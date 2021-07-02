@@ -1,10 +1,10 @@
-package com.example.ecache3;
+package com.example.ehcache3;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class Ecache3ApplicationTests {
+class EhCache3ApplicationTests {
 
     @Test
     void contextLoads() {
