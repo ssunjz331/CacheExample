@@ -2,7 +2,7 @@ package com.example.ehcache3.service;
 
 import com.example.ehcache3.controller.EhCacheController;
 import com.example.ehcache3.model.Employee;
-import com.example.ehcache3.model.Task;
+//import com.example.ehcache3.model.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
@@ -29,39 +29,39 @@ public class EhCacheService {
     }
 
 
-    @Cacheable(value = "taskCache")
-    public List<Task> findAll(){
-        logger.info("findAll tashCache");
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(new Task(1L, "My First task", true));
-        tasks.add(new Task(2L, "My Second task", false));
-        return tasks;
-    }
-
-    @Cacheable(value = "taskByUserIdCache", key = "#userId")
-    public List<Task> findAllByUserId(Integer userId){
-        logger.info("findAll By UserId");
-        List<Task> tasks = new ArrayList<>();
-
-        switch (userId) {
-            case 1:
-                tasks.add(new Task(1L, "1's First task", true));
-                tasks.add(new Task(2L, "1's Second task", false));
-                break;
-            case 2:
-                tasks.add(new Task(4L, "2's First task", true));
-                break;
-            case 3:
-                tasks.add(new Task(3L, "3's First task", true));
-                tasks.add(new Task(5L, "3's Second task", true));
-                tasks.add(new Task(6L, "3's Third task", false));
-                break;
-            default:
-                break;
-        }
-
-        return tasks;
-    }
+//    @Cacheable(value = "taskCache")
+//    public List<Task> findAll(){
+//        logger.info("findAll tashCache");
+//        List<Task> tasks = new ArrayList<>();
+//        tasks.add(new Task(1L, "My First task", true));
+//        tasks.add(new Task(2L, "My Second task", false));
+//        return tasks;
+//    }
+//
+//    @Cacheable(value = "taskByUserIdCache", key = "#userId")
+//    public List<Task> findAllByUserId(Integer userId){
+//        logger.info("findAll By UserId");
+//        List<Task> tasks = new ArrayList<>();
+//
+//        switch (userId) {
+//            case 1:
+//                tasks.add(new Task(1L, "1's First task", true));
+//                tasks.add(new Task(2L, "1's Second task", false));
+//                break;
+//            case 2:
+//                tasks.add(new Task(4L, "2's First task", true));
+//                break;
+//            case 3:
+//                tasks.add(new Task(3L, "3's First task", true));
+//                tasks.add(new Task(5L, "3's Second task", true));
+//                tasks.add(new Task(6L, "3's Third task", false));
+//                break;
+//            default:
+//                break;
+//        }
+//
+//        return tasks;
+//    }
 
 
     @Cacheable(cacheNames="employeeCache", key="#id")
