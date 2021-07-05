@@ -1,15 +1,22 @@
 package com.example.ehcache3.controller;
 
 //import com.example.ehcache3.util.EhCacheManager;
+import com.example.ehcache3.model.Employee;
+import com.example.ehcache3.model.Square;
+import com.example.ehcache3.model.Task;
+import com.example.ehcache3.service.EhCacheService;
+import com.example.ehcache3.util.EhCacheManagerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 
 /**
@@ -21,22 +28,76 @@ public class EhCacheController {
 
     private static final Logger logger = LoggerFactory.getLogger(EhCacheController.class);
 
+    @Autowired
+    EhCacheService service;
 
-//    @Autowired
-//    EhCacheManager cacheManager;
+    @Autowired
+    EhCacheManagerUtil util;
+
+    @Autowired
+    CacheManager cacheManager;
 
     @Cacheable(value = "squareCache", key = "#number", condition = "#number > 10")
     @GetMapping(value = "/ehcahe/{number}")
     public String getSquare(@PathVariable Long number){
         logger.info("====== EhCacheController - getSquare =====");
-        return String.format("{\"square\":%s}", square(number));
+        Cache cache = cacheManager.getCache("squareCache");
+
+        Square squareDto = new Square();
+        try{
+
+            squareDto.setNumber(number);
+            squareDto.setSquarevalue(service.square(number));
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+
+        System.out.println("squareDto = "+squareDto.toString());
+        System.out.println("cache = " + cache.get(3L));
+
+        return String.format("{\"square\":%s}", service.square(number));
     }
 
-    @Cacheable(value = "squareCache", key = "#number", condition = "#number > 10")
-    public BigDecimal square(Long number){
-        BigDecimal square = BigDecimal.valueOf(number).multiply(BigDecimal.valueOf(number));
-        logger.info("square of {} is {}", number, square);
-        return square;
+    @GetMapping(value = "employee")
+    public void employee(){
+        Cache cache = cacheManager.getCache("employeeCache");
+
+        System.out.println(service.getEmployeeById(1L));
+
+        //This will hit the cache - verify the message in console output
+        System.out.println(service.getEmployeeById(2L));
+
+        //Add entry to cache
+        cache.put(3L, new Employee(3L, "Charles", "Dave"));
+
+        //Get entry from cache
+        System.out.println(cache.get(3L).get());
+
+    }
+
+    @GetMapping(path = "/all")
+    public List<Task> getAllTasks() {
+        logger.info("call taskService.findAll");
+        return service.findAll();
+    }
+
+    @GetMapping(path = "/all/{userId}")
+    public List<Task> getAllTasksByUserId(@PathVariable Integer userId) {
+        logger.info("call taskService.findAllByUserId");
+        return service.findAllByUserId(userId);
+    }
+
+    @PostMapping(value = "/clear/cache/{cache_name}")
+    public ResponseEntity<Void> clearCacheByName(@PathVariable(name = "cache_name") String cacheName) {
+        util.clearCache(cacheName);
+        return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/clear/cache/all")
+    public ResponseEntity<Void> clearCacheAll() {
+        util.clearCacheAll();
+        return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
 //    @PostMapping(value = "/clear/cache/{cache_name}")
