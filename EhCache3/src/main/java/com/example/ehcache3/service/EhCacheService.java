@@ -7,6 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -64,10 +67,22 @@ public class EhCacheService {
     @Cacheable(cacheNames="employeeCache", key="#id")
     public Employee getEmployeeById(Long id) {
         HashMap<Long, Employee> db = new HashMap<>();
-        db.put(1L, new Employee(1L, "Alex", "Gussin"));
-        db.put(2L, new Employee(2L, "Brian", "Schultz"));
+//        db.put(1L, new Employee(1L, "Alex", "Gussin"));
+//        db.put(2L, new Employee(2L, "Brian", "Schultz"));
 
-        System.out.println("Getting employee from DB");
+//        System.out.println("Getting employee from DB");
+
         return db.get(id);
     }
+
+    @Cacheable(cacheNames = "employeeCache", key = "#id")
+    public Employee addEmployee(Long id, String firstName, String lastName){
+        Employee employee = new Employee();
+        employee.setId(id);
+        employee.setFirstName(firstName);
+        employee.setLastName(lastName);
+        return employee;
+    }
+
+
 }

@@ -37,56 +37,80 @@ public class EhCacheController {
     @Autowired
     CacheManager cacheManager;
 
-    @Cacheable(value = "squareCache", key = "#number", condition = "#number > 10")
-    @GetMapping(value = "/ehcahe/{number}")
-    public String getSquare(@PathVariable Long number){
-        logger.info("====== EhCacheController - getSquare =====");
-        Cache cache = cacheManager.getCache("squareCache");
+//    @Cacheable(value = "squareCache", key = "#number", condition = "#number > 10")
+//    @GetMapping(value = "/ehcahe/{number}")
+//    public String getSquare(@PathVariable Long number){
+//        logger.info("====== EhCacheController - getSquare =====");
+//        Cache cache = cacheManager.getCache("squareCache");
+//
+//        Square squareDto = new Square();
+//        try{
+//
+//            squareDto.setNumber(number);
+//            squareDto.setSquarevalue(service.square(number));
+//
+//        } catch(Exception e){
+//            e.printStackTrace();
+//        }
+//
+//        System.out.println("squareDto = "+squareDto.toString());
+//        System.out.println("cache = " + cache.get(3L));
+//
+//        return String.format("{\"square\":%s}", service.square(number));
+//    }
 
-        Square squareDto = new Square();
-        try{
+//    @GetMapping(value = "employee")
+//    public void employee(){
+//        Cache cache = cacheManager.getCache("employeeCache");
+//
+//        System.out.println(service.getEmployeeById(1L));
+//
+//        //This will hit the cache - verify the message in console output
+//        System.out.println(service.getEmployeeById(2L));
+//
+//        //Add entry to cache
+//        cache.put(3L, new Employee(3L, "Charles", "Dave"));
+//
+//        //Get entry from cache
+//        System.out.println(cache.get(3L).get());
+//
+//    }
 
-            squareDto.setNumber(number);
-            squareDto.setSquarevalue(service.square(number));
+    @Cacheable(cacheNames = "employeeCache", key = "#id")
+    @GetMapping(value = "/add/employee")
+    public Employee addEmployee(@RequestParam(value = "id") Long id,
+                               @RequestParam(value = "firstName") String firstName,
+                               @RequestParam(value = "lastName") String lastName){
+        service.addEmployee(id,firstName,lastName);
 
-        } catch(Exception e){
-            e.printStackTrace();
-        }
-
-        System.out.println("squareDto = "+squareDto.toString());
-        System.out.println("cache = " + cache.get(3L));
-
-        return String.format("{\"square\":%s}", service.square(number));
-    }
-
-    @GetMapping(value = "employee")
-    public void employee(){
         Cache cache = cacheManager.getCache("employeeCache");
-
-        System.out.println(service.getEmployeeById(1L));
-
-        //This will hit the cache - verify the message in console output
-        System.out.println(service.getEmployeeById(2L));
-
-        //Add entry to cache
-        cache.put(3L, new Employee(3L, "Charles", "Dave"));
-
-        //Get entry from cache
-        System.out.println(cache.get(3L).get());
-
+        service.getEmployeeById(id);
+        return service.addEmployee(id,firstName,lastName);
     }
 
-    @GetMapping(path = "/all")
-    public List<Task> getAllTasks() {
-        logger.info("call taskService.findAll");
-        return service.findAll();
+    @GetMapping(value = "/get/employee/{id}")
+    public Employee getEmployee(@PathVariable Long id){
+        Cache cache = cacheManager.getCache("employeeCache");
+        try {
+            cache.get(id).get();
+        }catch (NullPointerException e){
+            e.printStackTrace();
+            logger.error("해당 cacheName의 cache는 Null.");
+        }
+        return (Employee) cache.get(id).get();
     }
 
-    @GetMapping(path = "/all/{userId}")
-    public List<Task> getAllTasksByUserId(@PathVariable Integer userId) {
-        logger.info("call taskService.findAllByUserId");
-        return service.findAllByUserId(userId);
-    }
+//    @GetMapping(path = "/all")
+//    public List<Task> getAllTasks() {
+//        logger.info("call taskService.findAll");
+//        return service.findAll();
+//    }
+
+//    @GetMapping(path = "/all/{userId}")
+//    public List<Task> getAllTasksByUserId(@PathVariable Integer userId) {
+//        logger.info("call taskService.findAllByUserId");
+//        return service.findAllByUserId(userId);
+//    }
 
     @PostMapping(value = "/clear/cache/{cache_name}")
     public ResponseEntity<Void> clearCacheByName(@PathVariable(name = "cache_name") String cacheName) {
