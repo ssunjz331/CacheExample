@@ -29,7 +29,7 @@ public class EhCacheController {
     @GetMapping(value = "/ehcahe/{number}")
     public String getSquare(@PathVariable Long number){
         logger.info("====== EhCacheController - getSquare =====");
-        return String.format("{\"square\":%s|", square(number));
+        return String.format("{\"square\":%s}", square(number));
     }
 
     @Cacheable(value = "squareCache", key = "#number", condition = "#number > 10")
