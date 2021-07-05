@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -111,6 +112,14 @@ public class EhCacheController {
 //        logger.info("call taskService.findAllByUserId");
 //        return service.findAllByUserId(userId);
 //    }
+
+    @CacheEvict(value = "employeeCache")
+    @PostMapping(value = "/flush/cache/{id}")
+    public void flushCache(@PathVariable(name="id") Long id){
+        cacheManager.getCache("employeeCache").evict(id);
+        logger.info("flushed");
+    }
+
 
     @PostMapping(value = "/clear/cache/{cache_name}")
     public ResponseEntity<Void> clearCacheByName(@PathVariable(name = "cache_name") String cacheName) {
