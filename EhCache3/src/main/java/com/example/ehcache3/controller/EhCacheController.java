@@ -82,10 +82,17 @@ public class EhCacheController {
     public Employee addEmployee(@RequestParam(value = "id") Long id,
                                @RequestParam(value = "firstName") String firstName,
                                @RequestParam(value = "lastName") String lastName){
-        service.addEmployee(id,firstName,lastName);
 
-        Cache cache = cacheManager.getCache("employeeCache");
-        service.getEmployeeById(id);
+        logger.info("++++++++++++++++++ addEmployee Start +++++++++++++++++++");
+        try {
+            cacheManager.getCache("employeeCache").clear();
+            service.addEmployee(id, firstName, lastName);
+
+            Cache cache = cacheManager.getCache("employeeCache");
+            service.getEmployeeById(id);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         return service.addEmployee(id,firstName,lastName);
     }
 

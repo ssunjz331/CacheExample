@@ -1,5 +1,6 @@
 package com.example.redis.controller;
 
+import com.example.redis.constants.RedisConstants;
 import com.example.redis.dto.Member;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -15,17 +17,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.swing.plaf.metal.MetalMenuBarUI;
 import java.lang.reflect.Method;
 
 @RestController
 public class RedisController {
 
     /**
-     * @Cacheble은 캐시가 있으면 캐시의 정보를 가져오고, 없으면 등록한다.
+     * @Cacheble은 캐시가 있으면 캐시의 정보를 가져오고, 없으면 등록한다. 캐시가 존재하면 메서드를 실행하지 않고 캐시된 값이 반환됩니다. 캐시가 존재하지 않으면 메서드가 실행되고 리턴되는 데이터가 캐시에 저장
      *
-     * @Cacheble은 캐시가 있으면 캐시의 정보를 가져오고, 없으면 등록한다.
+     * @CachePut 캐시에 데이터를 넣거나 수정시 사용합니다. 메서드의 리턴값이 캐시에 없으면 저장하고 있을경우 갱신합니다.
      *
      * @CacheEvict -> 캐시삭제
+     *
+     * @Caching 여러개의 캐시 annotation을 실행되어야 할때 사용
      */
 
     private static final Logger logger = LoggerFactory.getLogger(RedisController.class);
@@ -36,13 +41,13 @@ public class RedisController {
     @Autowired
     CacheManager cacheManager;
 
-    @Cacheable(cacheNames = "memberCache", key = "#name")
+    @Cacheable(cacheNames = RedisConstants.MEMBER_CACHE, key = "#name")
     @GetMapping(value = "/addCache")
     public Member addKey(@RequestParam(value = "name") String name,
                                 @RequestParam(value = "id") String id){
         logger.info("--------------addKey----------------");
 
-        evictAllCacheValues("memberCache");
+        evictAllCacheValues(RedisConstants.MEMBER_CACHE);
 
         Member member = new Member();
         try{
@@ -53,6 +58,14 @@ public class RedisController {
             e.printStackTrace();
         }
 
+        return member;
+    }
+
+    @CachePut(value = RedisConstants.MEMBER_CACHE, key = "#name")
+    @GetMapping(value = "/updateCache")
+    public Member update(@RequestParam(value = "name") String name,
+                         @RequestParam(value = "id") String id){
+        Member member = (Member)cacheManager.getCache(RedisConstants.MEMBER_CACHE).get(name);
         return member;
     }
 
