@@ -56,6 +56,12 @@
 <!--        </resources>-->
 <!--    </cache>-->
 
+<!--    Persistent cache directory-->
+<!--    <persistence directory="spring-boot-ehcache/cache" />-->
+<!--    <persistence directory="${java.io.tmpdir}/ehcache-data" />-->
+<!--    <persistence directory="java.io.tmpdir" />-->
+    <persistence directory="./cache"></persistence>
+
     <cache alias="employeeCache">
         <key-type>java.lang.Long</key-type>
         <value-type>com.example.ehcache3.model.Employee</value-type>
@@ -76,7 +82,10 @@
         </listeners>
         <resources>
             <heap unit="entries">2000</heap>
+<!--            <heap>1</heap>-->
             <offheap unit="MB">100</offheap>
+<!--            <disk unit="MB" persistent="true">10</disk>-->
+            <disk unit="GB" persistent="true">100</disk>
         </resources>
     </cache>
 

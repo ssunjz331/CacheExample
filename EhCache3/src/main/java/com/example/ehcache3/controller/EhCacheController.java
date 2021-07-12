@@ -1,11 +1,15 @@
 package com.example.ehcache3.controller;
 
 //import com.example.ehcache3.util.EhCacheManager;
+import com.example.ehcache3.constants.EhCacheConstants;
 import com.example.ehcache3.model.Employee;
 //import com.example.ehcache3.model.Square;
 //import com.example.ehcache3.model.Task;
 import com.example.ehcache3.service.EhCacheService;
 import com.example.ehcache3.util.EhCacheManagerUtil;
+import com.example.ehcache3.util.PersistentCacheManagerUtil;
+import org.ehcache.config.builders.ResourcePoolsBuilder;
+import org.ehcache.config.units.EntryUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PreDestroy;
 import java.util.List;
 
 
@@ -37,6 +42,9 @@ public class EhCacheController {
 
     @Autowired
     CacheManager cacheManager;
+
+    @Autowired
+    private javax.cache.CacheManager manager;
 
 //    @Cacheable(value = "squareCache", key = "#number", condition = "#number > 10")
 //    @GetMapping(value = "/ehcahe/{number}")
@@ -77,7 +85,7 @@ public class EhCacheController {
 //
 //    }
 
-    @Cacheable(cacheNames = "employeeCache", key = "#id")
+    @Cacheable(cacheNames = EhCacheConstants.EMPLOYEE_CACHE, key = "#id")
     @GetMapping(value = "/add/employee")
     public Employee addEmployee(@RequestParam(value = "id") Long id,
                                @RequestParam(value = "firstName") String firstName,
@@ -85,7 +93,11 @@ public class EhCacheController {
 
         logger.info("++++++++++++++++++ addEmployee Start +++++++++++++++++++");
         try {
-            cacheManager.getCache("employeeCache").clear();
+
+//            ResourcePoolsBuilder.newResourcePoolsBuilder().heap(10, EntryUnit.ENTRIES);
+            PersistentCacheManagerUtil.util();
+
+//            cacheManager.getCache("employeeCache").clear();
             service.addEmployee(id, firstName, lastName);
 
             Cache cache = cacheManager.getCache("employeeCache");
@@ -120,10 +132,10 @@ public class EhCacheController {
 //        return service.findAllByUserId(userId);
 //    }
 
-    @CacheEvict(value = "employeeCache")
+    @CacheEvict(value = EhCacheConstants.EMPLOYEE_CACHE)
     @PostMapping(value = "/flush/cache/{id}")
     public void flushCache(@PathVariable(name="id") Long id){
-        cacheManager.getCache("employeeCache").evict(id);
+        cacheManager.getCache(EhCacheConstants.EMPLOYEE_CACHE).evict(id);
         logger.info("flushed");
     }
 
@@ -152,5 +164,9 @@ public class EhCacheController {
 //        return new ResponseEntity<>(HttpStatus.OK);
 //    }
 
+    @PreDestroy
+    public void close(){
+        manager.close();
+    }
 
 }

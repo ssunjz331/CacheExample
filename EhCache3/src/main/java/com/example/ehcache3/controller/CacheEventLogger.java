@@ -5,6 +5,9 @@ import org.ehcache.event.CacheEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 모니터링
+ */
 public class CacheEventLogger implements CacheEventListener<Object,Object> {
 
     private static final Logger logger = LoggerFactory.getLogger(CacheEventLogger.class);
